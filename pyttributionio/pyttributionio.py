@@ -87,3 +87,14 @@ class PyttributionIo:
             ).get('customer')
         except RequestException as e:
             logger.error(f'Retrieval of customer touchpoints failed with HTTP status {e}')
+
+    def fetch_customer_info_events(self, client_id):
+        try:
+            return self._send_private_api_request(
+                method=PyttributionIo.GET_REQUEST,
+                endpoint='customers',
+                subject_id=client_id,
+                show_events='true'
+            ).get('customer')
+        except RequestException as e:
+            logger.error(f'Retrieval of customer events failed with HTTP status {e}')
