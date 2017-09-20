@@ -37,6 +37,17 @@ class PyttributionIo:
 
         return json.loads(response.content)
 
+    def _send_public_api_request(self, url, data):
+        response = requests.post(
+            url=url,
+            json=data,
+        )
+
+        if not response.ok:
+            raise RequestException(response.text)
+
+        return response.status_code
+
     """
     Private API methods
     """
