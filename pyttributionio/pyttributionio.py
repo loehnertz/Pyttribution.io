@@ -26,6 +26,38 @@ class PyttributionIo:
     def _generate_random_id(size=24, chars=string.ascii_lowercase + string.digits):
         return ''.join(random.choice(chars) for n in range(size))
 
+    def _build_identity_request_data(self, attributionio_id, client_id='', user_agent=''):
+        return {
+            'identity': {
+                'aliases': [attributionio_id],
+                'client_id': client_id if client_id else self._generate_random_id(),
+                'public_key': self._api_key,
+                'created_at': int(time.time()),
+                'meta': {
+                    'agent': user_agent if user_agent else 'User-Agent unknown'
+                }
+            }
+        }
+
+    def _build_event_request_data(self, attributionio_id, event_key, client_id='', user_agent='', last_url=''):
+        client_id = client_id if client_id else self._generate_random_id()
+
+        return {
+            'event': {
+                'aliases': [attributionio_id],
+                'client_id': client_id,
+                'event_public_key': event_key,
+                'url': last_url if last_url else 'URL unknown',
+                'public_key': self._api_key,
+                'transaction_id': str(client_id) + '@' + str(int(time.time())),
+                'is_informational': False,
+                'created_at': int(time.time()),
+                'meta': {
+                    'agent': user_agent if user_agent else 'User-Agent unknown'
+                }
+            }
+        }
+
     def _send_private_api_request(self, subject_id, method='GET', endpoint='customers', **params):
         response = requests.request(
             method=method,
