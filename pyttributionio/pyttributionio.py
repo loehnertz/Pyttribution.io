@@ -173,3 +173,26 @@ class PyttributionIo:
             )
         except RequestException as e:
             logger.error(f'Identity trigger for ID "{attributionio_id}" failed with HTTP status {e}!')
+
+    def trigger_event(self, attributionio_id, event_key, client_id='', user_agent='', last_url=''):
+        try:
+            event_trigger_response = self._send_public_api_request(
+                url='https://api.attribution.io/events',
+                data=self._build_event_request_data(
+                    attributionio_id=attributionio_id,
+                    event_key=event_key,
+                    client_id=client_id,
+                    user_agent=user_agent,
+                    last_url=last_url,
+                )
+            )
+
+            identity_trigger_response = self.trigger_identity(
+                attributionio_id=attributionio_id,
+                client_id=client_id,
+                user_agent=user_agent,
+            )
+
+            return event_trigger_response, identity_trigger_response
+        except RequestException as e:
+            logger.error(f'Event trigger for ID "{attributionio_id}" failed with HTTP status {e}!')
