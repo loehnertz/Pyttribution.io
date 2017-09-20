@@ -156,3 +156,20 @@ class PyttributionIo:
             ).get('customer')
         except RequestException as e:
             logger.error(f'Retrieval of customer identities failed with HTTP status {e}')
+
+    """
+    Public API Methods
+    """
+
+    def trigger_identity(self, attributionio_id, client_id='', user_agent=''):
+        try:
+            return self._send_public_api_request(
+                url='https://api.attribution.io/identities',
+                data=self._build_identity_request_data(
+                    attributionio_id=attributionio_id,
+                    client_id=client_id,
+                    user_agent=user_agent,
+                )
+            )
+        except RequestException as e:
+            logger.error(f'Identity trigger for ID "{attributionio_id}" failed with HTTP status {e}!')
