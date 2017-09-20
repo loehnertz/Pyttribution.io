@@ -21,3 +21,18 @@ class PyttributionIo:
     """
     General methods
     """
+
+    def _send_private_api_request(self, subject_id, method='GET', endpoint='customers', **params):
+        response = requests.request(
+            method=method,
+            url=f'{PyttributionIo.API_URL}/{self._api_key}/{endpoint}/{subject_id}',
+            params={
+                **{'secret': self._api_secret},
+                **params
+            },
+        )
+
+        if not response.ok:
+            raise RequestException(response.text)
+
+        return json.loads(response.content)
