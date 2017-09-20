@@ -22,6 +22,10 @@ class PyttributionIo:
     General methods
     """
 
+    @staticmethod
+    def _generate_random_id(size=24, chars=string.ascii_lowercase + string.digits):
+        return ''.join(random.choice(chars) for n in range(size))
+
     def _send_private_api_request(self, subject_id, method='GET', endpoint='customers', **params):
         response = requests.request(
             method=method,
