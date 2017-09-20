@@ -36,3 +36,21 @@ class PyttributionIo:
             raise RequestException(response.text)
 
         return json.loads(response.content)
+
+    """
+    Private API methods
+    """
+
+    """
+    Section: Customer
+    """
+
+    def fetch_customer_info_base(self, client_id):
+        try:
+            return self._send_private_api_request(
+                method=PyttributionIo.GET_REQUEST,
+                endpoint='customers',
+                subject_id=client_id,
+            ).get('customer')
+        except RequestException as e:
+            logger.error(f'Retrieval of base customer info failed with HTTP status {e}')
