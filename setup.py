@@ -7,6 +7,7 @@ setup(
     description='A Python wrapper around the Attribution.io API',
     author='Jakob Löhnertz',
     author_email='help@jakob.codes',
+    license='MIT',
     url='https://github.com/loehnertz/Pyttribution.io',
     download_url='https://github.com/loehnertz/Pyttribution.io/archive/0.1.tar.gz',
     keywords=['attribution.io', 'api', 'api-wrapper'],
