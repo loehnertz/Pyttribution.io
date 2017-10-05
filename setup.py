@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
     name='pyttributionio',
     packages=['pyttributionio'],
-    version='0.1',
+    version='0.2',
     description='A Python wrapper around the Attribution.io API',
     author='Jakob Löhnertz',
     author_email='help@jakob.codes',
