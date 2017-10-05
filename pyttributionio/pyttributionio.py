@@ -11,6 +11,10 @@ logger = logging.getLogger(__name__)
 
 
 class PyttributionIo:
+    """
+    A Python wrapper around the Attribution.io API (by Jakob Löhnertz – www.jakob.codes)
+    """
+
     GET_REQUEST = 'GET'
     API_URL = 'https://attribution.io/api/v1'
 
@@ -97,6 +101,13 @@ class PyttributionIo:
     """
 
     def fetch_customer_info_base(self, client_id):
+        """
+        Retrieves the basic information about any customer.
+
+        :param client_id: The identification earlier used to identify the customer e.g. an email address
+        :return: The fetched data as native Python data structures
+        """
+
         try:
             return self._send_private_api_request(
                 method=PyttributionIo.GET_REQUEST,
@@ -107,6 +118,13 @@ class PyttributionIo:
             logger.error('Retrieval of base customer info failed with HTTP status {exception}'.format(exception=e))
 
     def fetch_customer_info_full(self, client_id):
+        """
+        Retrieves the full information about any customer.
+
+        :param client_id: The identification earlier used to identify the customer e.g. an email address
+        :return: The fetched data as native Python data structures
+        """
+
         try:
             return self._send_private_api_request(
                 method=PyttributionIo.GET_REQUEST,
@@ -118,6 +136,13 @@ class PyttributionIo:
             logger.error('Retrieval of full customer info failed with HTTP status {exception}'.format(exception=e))
 
     def fetch_customer_info_pageviews(self, client_id):
+        """
+        Retrieves the pageviews information about any customer.
+
+        :param client_id: The identification earlier used to identify the customer e.g. an email address
+        :return: The fetched data as native Python data structures
+        """
+
         try:
             return self._send_private_api_request(
                 method=PyttributionIo.GET_REQUEST,
@@ -129,6 +154,13 @@ class PyttributionIo:
             logger.error('Retrieval of customer pageviews failed with HTTP status {exception}'.format(exception=e))
 
     def fetch_customer_info_touchpoints(self, client_id):
+        """
+        Retrieves the touchpoints information about any customer.
+
+        :param client_id: The identification earlier used to identify the customer e.g. an email address
+        :return: The fetched data as native Python data structures
+        """
+
         try:
             return self._send_private_api_request(
                 method=PyttributionIo.GET_REQUEST,
@@ -140,6 +172,13 @@ class PyttributionIo:
             logger.error('Retrieval of customer touchpoints failed with HTTP status {exception}'.format(exception=e))
 
     def fetch_customer_info_events(self, client_id):
+        """
+        Retrieves the events information about any customer.
+
+        :param client_id: The identification earlier used to identify the customer e.g. an email address
+        :return: The fetched data as native Python data structures
+        """
+
         try:
             return self._send_private_api_request(
                 method=PyttributionIo.GET_REQUEST,
@@ -151,6 +190,13 @@ class PyttributionIo:
             logger.error('Retrieval of customer events failed with HTTP status {exception}'.format(exception=e))
 
     def fetch_customer_info_identities(self, client_id):
+        """
+        Retrieves the identities information about any customer.
+
+        :param client_id: The identification earlier used to identify the customer e.g. an email address
+        :return: The fetched data as native Python data structures
+        """
+
         try:
             return self._send_private_api_request(
                 method=PyttributionIo.GET_REQUEST,
@@ -166,6 +212,16 @@ class PyttributionIo:
     """
 
     def trigger_identity(self, attributionio_id, client_id='', user_agent=''):
+        """
+        Links any type of identification e.g. an email address, a customer reference number etc. to a
+        so far anonymous cookie.
+
+        :param attributionio_id: The cookie value (AttrioP_)
+        :param client_id: [optional] The chosen identification of the client e.g. an email address
+        :param user_agent: [optional] The User Agent of the client
+        :return: The HTTP status code of the request
+        """
+
         try:
             return self._send_public_api_request(
                 url='https://api.attribution.io/identities',
@@ -184,6 +240,17 @@ class PyttributionIo:
             )
 
     def trigger_event(self, attributionio_id, event_key, client_id='', user_agent='', last_url=''):
+        """
+        Triggers any event towards Attribution.io
+
+        :param attributionio_id: The cookie value (AttrioP_)
+        :param event_key: The event key chosen in the settings of Attribution.io
+        :param client_id: [optional] The chosen identification of the client e.g. an email address
+        :param user_agent: [optional] The User Agent of the client
+        :param last_url: [optional] The most recent URL the client visited where he/she triggered the event
+        :return: The HTTP status code of the request
+        """
+
         try:
             event_trigger_response = self._send_public_api_request(
                 url='https://api.attribution.io/events',
