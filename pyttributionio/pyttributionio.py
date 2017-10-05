@@ -17,6 +17,7 @@ class PyttributionIo:
     def __init__(self, api_key, api_secret):
         self._api_key = api_key
         self._api_secret = api_secret
+        self.RequestException = RequestException
 
     """
     General methods
@@ -59,13 +60,16 @@ class PyttributionIo:
         }
 
     def _send_private_api_request(self, subject_id, method='GET', endpoint='customers', **params):
+        params.update({'secret': self._api_secret})
         response = requests.request(
             method=method,
-            url=f'{PyttributionIo.API_URL}/{self._api_key}/{endpoint}/{subject_id}',
-            params={
-                **{'secret': self._api_secret},
-                **params
-            },
+            url='{url}/{api_key}/{endpoint}/{subject_id}'.format(
+                url=PyttributionIo.API_URL,
+                api_key=self._api_key,
+                endpoint=endpoint,
+                subject_id=subject_id,
+            ),
+            params=params,
         )
 
         if not response.ok:
@@ -100,7 +104,7 @@ class PyttributionIo:
                 subject_id=client_id,
             ).get('customer')
         except RequestException as e:
-            logger.error(f'Retrieval of base customer info failed with HTTP status {e}')
+            logger.error('Retrieval of base customer info failed with HTTP status {exception}'.format(exception=e))
 
     def fetch_customer_info_full(self, client_id):
         try:
@@ -111,7 +115,7 @@ class PyttributionIo:
                 show_all='true'
             ).get('customer')
         except RequestException as e:
-            logger.error(f'Retrieval of full customer info failed with HTTP status {e}')
+            logger.error('Retrieval of full customer info failed with HTTP status {exception}'.format(exception=e))
 
     def fetch_customer_info_pageviews(self, client_id):
         try:
@@ -122,7 +126,7 @@ class PyttributionIo:
                 show_pageviews='true'
             ).get('customer')
         except RequestException as e:
-            logger.error(f'Retrieval of customer pageviews failed with HTTP status {e}')
+            logger.error('Retrieval of customer pageviews failed with HTTP status {exception}'.format(exception=e))
 
     def fetch_customer_info_touchpoints(self, client_id):
         try:
@@ -133,7 +137,7 @@ class PyttributionIo:
                 show_touchpoints='true'
             ).get('customer')
         except RequestException as e:
-            logger.error(f'Retrieval of customer touchpoints failed with HTTP status {e}')
+            logger.error('Retrieval of customer touchpoints failed with HTTP status {exception}'.format(exception=e))
 
     def fetch_customer_info_events(self, client_id):
         try:
@@ -144,7 +148,7 @@ class PyttributionIo:
                 show_events='true'
             ).get('customer')
         except RequestException as e:
-            logger.error(f'Retrieval of customer events failed with HTTP status {e}')
+            logger.error('Retrieval of customer events failed with HTTP status {exception}'.format(exception=e))
 
     def fetch_customer_info_identities(self, client_id):
         try:
@@ -155,7 +159,7 @@ class PyttributionIo:
                 show_identities='true'
             ).get('customer')
         except RequestException as e:
-            logger.error(f'Retrieval of customer identities failed with HTTP status {e}')
+            logger.error('Retrieval of customer identities failed with HTTP status {exception}'.format(exception=e))
 
     """
     Public API Methods
@@ -172,7 +176,12 @@ class PyttributionIo:
                 )
             )
         except RequestException as e:
-            logger.error(f'Identity trigger for ID "{attributionio_id}" failed with HTTP status {e}!')
+            logger.error(
+                'Identity trigger for ID "{attributionio_id}" failed with HTTP status {exception}!'.format(
+                    attributionio_id=attributionio_id,
+                    exception=e,
+                )
+            )
 
     def trigger_event(self, attributionio_id, event_key, client_id='', user_agent='', last_url=''):
         try:
@@ -195,4 +204,9 @@ class PyttributionIo:
 
             return event_trigger_response, identity_trigger_response
         except RequestException as e:
-            logger.error(f'Event trigger for ID "{attributionio_id}" failed with HTTP status {e}!')
+            logger.error(
+                'Event trigger for ID "{attributionio_id}" failed with HTTP status {exception}!'.format(
+                    attributionio_id=attributionio_id,
+                    exception=e,
+                )
+            )
