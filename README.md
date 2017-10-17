@@ -1,6 +1,6 @@
 # Pyttribution.io
-[![PyPI](https://img.shields.io/pypi/dm/pyttributionio.svg)](https://pypi.python.org/pypi/pyttributionio)     
-     
+[![PyPI version](https://badge.fury.io/py/pyttributionio.svg)](https://badge.fury.io/py/pyttributionio)
+
 A Python wrapper around the Attribution.io API
 
 ## Installation
@@ -67,7 +67,7 @@ pyttributionio.trigger_event(
 ```     
 
 You need to pass the ID from the cookie which the Attribution.io JavaScript snippet creates for each visitor of your sites as the `attributionio_id`.
-The key/name of the cookie in the browser is: `AttrioP_[YOUR_API_KEY]`         
+The key/name of the cookie in the browser is: `AttrioP_[CLIENT_ID]`         
 With events you also need to pass an `event_key` which you need to set within the Dashboard of Attribution.io.     
      
 Optionally you can pass a custom `client_id` which can be an integer-based ID, an email address etc.
