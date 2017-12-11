@@ -17,6 +17,8 @@ class PyttributionIo:
 
     GET_REQUEST = 'GET'
     API_URL = 'https://attribution.io/api/v1'
+    REQUEST_RETRY_AMOUNT = 10
+    REQUEST_RETRY_DELAY = 5
 
     def __init__(self, api_key, api_secret):
         self._api_key = api_key
@@ -63,8 +65,26 @@ class PyttributionIo:
             }
         }
 
-    def _send_private_api_request(self, subject_id, method='GET', endpoint='customers', **params):
+    def _make_private_api_request(self, subject_id, method='GET', endpoint='customers', **params):
         params.update({'secret': self._api_secret})
+        return json.loads(
+            self._send_private_api_request(
+                retries=PyttributionIo.REQUEST_RETRY_AMOUNT,
+                subject_id=subject_id,
+                method=method,
+                endpoint=endpoint,
+                params=params,
+            ).content
+        )
+
+    def _make_public_api_request(self, url, data):
+        return self._send_public_api_request(
+            retries=PyttributionIo.REQUEST_RETRY_AMOUNT,
+            url=url,
+            data=data,
+        ).status_code
+
+    def _send_private_api_request(self, retries, subject_id, method, endpoint, **params):
         response = requests.request(
             method=method,
             url='{url}/{api_key}/{endpoint}/{subject_id}'.format(
@@ -77,20 +97,44 @@ class PyttributionIo:
         )
 
         if not response.ok:
-            raise RequestException(response.text)
+            retries -= 1
 
-        return json.loads(response.content)
+            if retries == 0:
+                raise RequestException(response.text)
 
-    def _send_public_api_request(self, url, data):
+            time.sleep(PyttributionIo.REQUEST_RETRY_DELAY)
+
+            self._send_private_api_request(
+                retries=retries,
+                subject_id=subject_id,
+                method=method,
+                endpoint=endpoint,
+                params=params,
+            )
+        else:
+            return response
+
+    def _send_public_api_request(self, retries, url, data):
         response = requests.post(
             url=url,
             json=data,
         )
 
         if not response.ok:
-            raise RequestException(response.text)
+            retries -= 1
 
-        return response.status_code
+            if retries == 0:
+                raise RequestException(response.text)
+
+            time.sleep(PyttributionIo.REQUEST_RETRY_DELAY)
+
+            self._send_public_api_request(
+                retries=retries,
+                url=url,
+                data=data,
+            )
+        else:
+            return response
 
     """
     Private API methods
@@ -109,7 +153,7 @@ class PyttributionIo:
         """
 
         try:
-            return self._send_private_api_request(
+            return self._make_private_api_request(
                 method=PyttributionIo.GET_REQUEST,
                 endpoint='customers',
                 subject_id=client_id,
@@ -126,7 +170,7 @@ class PyttributionIo:
         """
 
         try:
-            return self._send_private_api_request(
+            return self._make_private_api_request(
                 method=PyttributionIo.GET_REQUEST,
                 endpoint='customers',
                 subject_id=client_id,
@@ -144,7 +188,7 @@ class PyttributionIo:
         """
 
         try:
-            return self._send_private_api_request(
+            return self._make_private_api_request(
                 method=PyttributionIo.GET_REQUEST,
                 endpoint='customers',
                 subject_id=client_id,
@@ -162,7 +206,7 @@ class PyttributionIo:
         """
 
         try:
-            return self._send_private_api_request(
+            return self._make_private_api_request(
                 method=PyttributionIo.GET_REQUEST,
                 endpoint='customers',
                 subject_id=client_id,
@@ -180,7 +224,7 @@ class PyttributionIo:
         """
 
         try:
-            return self._send_private_api_request(
+            return self._make_private_api_request(
                 method=PyttributionIo.GET_REQUEST,
                 endpoint='customers',
                 subject_id=client_id,
@@ -198,7 +242,7 @@ class PyttributionIo:
         """
 
         try:
-            return self._send_private_api_request(
+            return self._make_private_api_request(
                 method=PyttributionIo.GET_REQUEST,
                 endpoint='customers',
                 subject_id=client_id,
@@ -223,7 +267,7 @@ class PyttributionIo:
         """
 
         try:
-            return self._send_public_api_request(
+            return self._make_public_api_request(
                 url='https://api.attribution.io/identities',
                 data=self._build_identity_request_data(
                     attributionio_id=attributionio_id,
@@ -252,7 +296,7 @@ class PyttributionIo:
         """
 
         try:
-            event_trigger_response = self._send_public_api_request(
+            event_trigger_response = self._make_public_api_request(
                 url='https://api.attribution.io/events',
                 data=self._build_event_request_data(
                     attributionio_id=attributionio_id,
