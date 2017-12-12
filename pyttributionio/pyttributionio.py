@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import logging
 import json
 import random
@@ -16,7 +18,8 @@ class PyttributionIo:
     """
 
     GET_REQUEST = 'GET'
-    API_URL = 'https://attribution.io/api/v1'
+    PRIVATE_API_URL = 'https://attribution.io/api/v1'
+    PUBLIC_API_URL = 'https://api.attribution.io/'
     REQUEST_RETRY_AMOUNT = 10
     REQUEST_RETRY_DELAY = 5
 
@@ -66,75 +69,59 @@ class PyttributionIo:
         }
 
     def _make_private_api_request(self, subject_id, method='GET', endpoint='customers', **params):
-        params.update({'secret': self._api_secret})
-        return json.loads(
-            self._send_private_api_request(
-                retries=PyttributionIo.REQUEST_RETRY_AMOUNT,
-                subject_id=subject_id,
-                method=method,
-                endpoint=endpoint,
-                params=params,
-            ).content
-        )
+        try:
+            params.update({'secret': self._api_secret})
+            return json.loads(
+                self._send_private_api_request(
+                    retries=PyttributionIo.REQUEST_RETRY_AMOUNT,
+                    subject_id=subject_id,
+                    method=method,
+                    endpoint=endpoint,
+                    params=params,
+                ).content
+            )
+        except RequestException:
+            raise RequestException()
 
     def _make_public_api_request(self, url, data):
-        return self._send_public_api_request(
-            retries=PyttributionIo.REQUEST_RETRY_AMOUNT,
-            url=url,
-            data=data,
-        ).status_code
-
-    def _send_private_api_request(self, retries, subject_id, method, endpoint, **params):
-        response = requests.request(
-            method=method,
-            url='{url}/{api_key}/{endpoint}/{subject_id}'.format(
-                url=PyttributionIo.API_URL,
-                api_key=self._api_key,
-                endpoint=endpoint,
-                subject_id=subject_id,
-            ),
-            params=params,
-        )
-
-        if not response.ok:
-            retries -= 1
-
-            if retries == 0:
-                raise RequestException(response.text)
-
-            time.sleep(PyttributionIo.REQUEST_RETRY_DELAY)
-
-            self._send_private_api_request(
-                retries=retries,
-                subject_id=subject_id,
-                method=method,
-                endpoint=endpoint,
-                params=params,
-            )
-        else:
-            return response
-
-    def _send_public_api_request(self, retries, url, data):
-        response = requests.post(
-            url=url,
-            json=data,
-        )
-
-        if not response.ok:
-            retries -= 1
-
-            if retries == 0:
-                raise RequestException(response.text)
-
-            time.sleep(PyttributionIo.REQUEST_RETRY_DELAY)
-
-            self._send_public_api_request(
-                retries=retries,
+        try:
+            return self._send_public_api_request(
+                retries=PyttributionIo.REQUEST_RETRY_AMOUNT,
                 url=url,
                 data=data,
-            )
-        else:
-            return response
+            ).status_code
+        except RequestException:
+            raise RequestException()
+
+    def _send_private_api_request(self, retries, subject_id, method, endpoint, **params):
+        while retries > 0:
+            try:
+                return requests.request(
+                    method=method,
+                    url='{url}/{api_key}/{endpoint}/{subject_id}'.format(
+                        url=PyttributionIo.PRIVATE_API_URL,
+                        api_key=self._api_key,
+                        endpoint=endpoint,
+                        subject_id=subject_id,
+                    ),
+                    params=params,
+                )
+            except:
+                retries -= 1
+                time.sleep(PyttributionIo.REQUEST_RETRY_DELAY)
+        raise RequestException()
+
+    def _send_public_api_request(self, retries, url, data):
+        while retries > 0:
+            try:
+                return requests.post(
+                    url=url,
+                    json=data,
+                )
+            except:
+                retries -= 1
+                time.sleep(PyttributionIo.REQUEST_RETRY_DELAY)
+        raise RequestException()
 
     """
     Private API methods
@@ -159,7 +146,8 @@ class PyttributionIo:
                 subject_id=client_id,
             ).get('customer')
         except RequestException as e:
-            logger.error('Retrieval of base customer info failed with HTTP status {exception}'.format(exception=e))
+            logger.error('Pyttribution.io: Retrieval of base customer info failed with HTTP status {exception}'.format(
+                exception=e))
 
     def fetch_customer_info_full(self, client_id):
         """
@@ -177,7 +165,8 @@ class PyttributionIo:
                 show_all='true'
             ).get('customer')
         except RequestException as e:
-            logger.error('Retrieval of full customer info failed with HTTP status {exception}'.format(exception=e))
+            logger.error('Pyttribution.io: Retrieval of full customer info failed with HTTP status {exception}'.format(
+                exception=e))
 
     def fetch_customer_info_pageviews(self, client_id):
         """
@@ -195,7 +184,8 @@ class PyttributionIo:
                 show_pageviews='true'
             ).get('customer')
         except RequestException as e:
-            logger.error('Retrieval of customer pageviews failed with HTTP status {exception}'.format(exception=e))
+            logger.error('Pyttribution.io: Retrieval of customer pageviews failed with HTTP status {exception}'.format(
+                exception=e))
 
     def fetch_customer_info_touchpoints(self, client_id):
         """
@@ -213,7 +203,9 @@ class PyttributionIo:
                 show_touchpoints='true'
             ).get('customer')
         except RequestException as e:
-            logger.error('Retrieval of customer touchpoints failed with HTTP status {exception}'.format(exception=e))
+            logger.error(
+                'Pyttribution.io: Retrieval of customer touchpoints failed with HTTP status {exception}'.format(
+                    exception=e))
 
     def fetch_customer_info_events(self, client_id):
         """
@@ -231,7 +223,8 @@ class PyttributionIo:
                 show_events='true'
             ).get('customer')
         except RequestException as e:
-            logger.error('Retrieval of customer events failed with HTTP status {exception}'.format(exception=e))
+            logger.error(
+                'Pyttribution.io: Retrieval of customer events failed with HTTP status {exception}'.format(exception=e))
 
     def fetch_customer_info_identities(self, client_id):
         """
@@ -249,7 +242,8 @@ class PyttributionIo:
                 show_identities='true'
             ).get('customer')
         except RequestException as e:
-            logger.error('Retrieval of customer identities failed with HTTP status {exception}'.format(exception=e))
+            logger.error('Pyttribution.io: Retrieval of customer identities failed with HTTP status {exception}'.format(
+                exception=e))
 
     """
     Public API Methods
@@ -268,7 +262,7 @@ class PyttributionIo:
 
         try:
             return self._make_public_api_request(
-                url='https://api.attribution.io/identities',
+                url=PyttributionIo.PUBLIC_API_URL + 'identities',
                 data=self._build_identity_request_data(
                     attributionio_id=attributionio_id,
                     client_id=client_id,
@@ -277,7 +271,7 @@ class PyttributionIo:
             )
         except RequestException as e:
             logger.error(
-                'Identity trigger for ID "{attributionio_id}" failed with HTTP status {exception}!'.format(
+                'Pyttribution.io: Identity trigger for ID "{attributionio_id}" failed with HTTP status {exception}!'.format(
                     attributionio_id=attributionio_id,
                     exception=e,
                 )
@@ -297,7 +291,7 @@ class PyttributionIo:
 
         try:
             event_trigger_response = self._make_public_api_request(
-                url='https://api.attribution.io/events',
+                url=PyttributionIo.PUBLIC_API_URL + 'events',
                 data=self._build_event_request_data(
                     attributionio_id=attributionio_id,
                     event_key=event_key,
@@ -316,7 +310,7 @@ class PyttributionIo:
             return event_trigger_response, identity_trigger_response
         except RequestException as e:
             logger.error(
-                'Event trigger for ID "{attributionio_id}" failed with HTTP status {exception}!'.format(
+                'Pyttribution.io: Event trigger for ID "{attributionio_id}" failed with HTTP status {exception}!'.format(
                     attributionio_id=attributionio_id,
                     exception=e,
                 )
