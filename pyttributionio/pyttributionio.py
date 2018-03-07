@@ -93,7 +93,7 @@ class PyttributionIo:
         except RequestException:
             raise RequestException()
 
-    def _send_private_api_request(self, retries, subject_id, method, endpoint, **params):
+    def _send_private_api_request(self, retries, subject_id, method, endpoint, params):
         while retries > 0:
             try:
                 return requests.request(
